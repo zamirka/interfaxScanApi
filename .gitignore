@@ -13,7 +13,9 @@
 # My configuration
 myconf.json
 launch.json
+.vscode
+*.code-workspace
 
 # Build files
 debug
-scanApi
+interfaxScanApi
