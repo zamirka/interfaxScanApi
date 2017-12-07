@@ -2,16 +2,11 @@ package methods
 
 import (
 	"bytes"
+	"encoding/json"
 
 	"github.com/shopspring/decimal"
 	"github.com/zamirka/interfaxScanApi/utils"
 )
-
-// LoginResponse is a structure for login data
-type LoginResponse struct {
-	AccessToken string `json:"AccessToken"`
-	Expire      string `json:"Expire"`
-}
 
 // BalanceResponse is a response type for balance
 type BalanceResponse struct {
@@ -21,8 +16,8 @@ type BalanceResponse struct {
 	SearchRateBlockPeriod int             `json:"searchRateBlockPeriod"`
 }
 
-//Login is a POST method that authenticates a user in API and returns a token for future calls
-func Login(context utils.AppContext) (token *LoginResponse, err error) {
+//Login is a POST method that authenticates a user in API and writes a token and it's expire date for future calls into provided context
+func Login(context *utils.AppContext) (err error) {
 	requestURL := context.APIURL + "account/login"
 	var payload bytes.Buffer
 	payload.WriteString(`{"login":"`)
@@ -34,24 +29,40 @@ func Login(context utils.AppContext) (token *LoginResponse, err error) {
 	req, err := utils.PrepareRequest("POST", requestURL, bytes.NewReader(payload.Bytes()), "")
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	var t LoginResponse
-	err = utils.MakeRequest(req, &t)
+	var configData map[string]*json.RawMessage
+	err = utils.MakeRequest(req, &configData)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &t, nil
+	var token string
+	err = json.Unmarshal(*configData["AccessToken"], &token)
+	if err != nil {
+		return err
+	}
+
+	context.AccessToken = token
+
+	var expireDate string
+	err = json.Unmarshal(*configData["Expire"], &expireDate)
+	if err != nil {
+		return err
+	}
+
+	context.Expire = expireDate
+
+	return nil
 }
 
 // Balance is a GET method that returns Balance structure
-func Balance(accessToken string, context *utils.AppContext) (balance *BalanceResponse, err error) {
+func Balance(context *utils.AppContext) (balance *BalanceResponse, err error) {
 	requestURL := context.APIURL + "account/balance"
 
-	req, err := utils.PrepareRequest("GET", requestURL, nil, accessToken)
+	req, err := utils.PrepareRequest("GET", requestURL, nil, context.AccessToken)
 
 	if err != nil {
 		return nil, err

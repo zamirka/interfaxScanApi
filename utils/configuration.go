@@ -7,14 +7,16 @@ import (
 
 // AppContext is a configuration which is read from filw conf.json
 type AppContext struct {
-	APIURL   string `json:"APIURL"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	APIURL      string `json:"APIURL"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	AccessToken string
+	Expire      string
 }
 
 // InitExecutionContext is a method that reads settings from configuration file into special structure
 func InitExecutionContext(context *AppContext) error {
-	file, err := os.Open("conf.json")
+	file, err := os.Open("myconf.json")
 	if err != nil {
 		return err
 	}
