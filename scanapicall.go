@@ -11,7 +11,7 @@ var ctx utils.AppContext
 
 func main() {
 	var err error
-	if err = utils.InitExecutionContext(&ctx); err != nil {
+	if err = utils.InitExecutionContext("conf.json", &ctx); err != nil {
 		fmt.Println(err)
 		return
 	}
