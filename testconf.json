@@ -1,5 +1,5 @@
 {
-    "apiURL" : "https://d66301d2-2bc1-4cd3-8f2a-15b332f3e8bf.mock.pstmn.io/api/",
+    "apiURL" : "http://127.0.0.1:8080/api/",
     "username" : "dummyname",
     "password" : "dummypassword"
 }
