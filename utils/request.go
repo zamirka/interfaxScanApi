@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -11,9 +10,8 @@ import (
 
 // PrepareRequest a function that prepares a http.Request object with proper headers
 func PrepareRequest(httpMethod string, url string, payload io.Reader, accessToken string) (request *http.Request, err error) {
-	req, err := http.NewRequest(httpMethod, url, payload)
-	if err != nil {
-		fmt.Println(err)
+	var req *http.Request
+	if req, err = http.NewRequest(httpMethod, url, payload); err != nil {
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
@@ -29,23 +27,17 @@ func PrepareRequest(httpMethod string, url string, payload io.Reader, accessToke
 }
 
 // MakeRequest executes http.Request and fills passed object from JSON response
-func MakeRequest(request *http.Request, dataObject interface{}) error {
-	res, err := http.DefaultClient.Do(request)
-
-	if err != nil {
+func MakeRequest(request *http.Request, dataObject interface{}) (err error) {
+	var res *http.Response
+	if res, err = http.DefaultClient.Do(request); err != nil {
 		return err
 	}
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
+	var body []byte
+	if body, err = ioutil.ReadAll(res.Body); err != nil {
 		return err
 	}
-
-	// bodyStr := string(body)
-	// fmt.Println(bodyStr)
-	err = json.Unmarshal(body, &dataObject)
-
-	if err != nil {
+	if err = json.Unmarshal(body, &dataObject); err != nil {
 		return err
 	}
 	return nil

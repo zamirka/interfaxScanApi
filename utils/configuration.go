@@ -15,14 +15,13 @@ type AppContext struct {
 }
 
 // InitExecutionContext is a method that reads settings from configuration file into special structure
-func InitExecutionContext(context *AppContext) error {
-	file, err := os.Open("myconf.json")
-	if err != nil {
+func InitExecutionContext(context *AppContext) (err error) {
+	var file *os.File
+	if file, err = os.Open("myconf.json"); err != nil {
 		return err
 	}
 	jsonParser := json.NewDecoder(file)
-	err = jsonParser.Decode(context)
-	if err != nil {
+	if err = jsonParser.Decode(context); err != nil {
 		return err
 	}
 	defer file.Close()

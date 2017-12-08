@@ -3,6 +3,7 @@ package methods
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
 
 	"github.com/shopspring/decimal"
 	"github.com/zamirka/interfaxScanApi/utils"
@@ -25,55 +26,37 @@ func Login(context *utils.AppContext) (err error) {
 	payload.WriteString(`","password":"`)
 	payload.WriteString(context.Password)
 	payload.WriteString(`"}`)
-
-	req, err := utils.PrepareRequest("POST", requestURL, bytes.NewReader(payload.Bytes()), "")
-
-	if err != nil {
+	var req *http.Request
+	if req, err = utils.PrepareRequest("POST", requestURL, bytes.NewReader(payload.Bytes()), ""); err != nil {
 		return err
 	}
-
 	var configData map[string]*json.RawMessage
-	err = utils.MakeRequest(req, &configData)
-
-	if err != nil {
+	if err = utils.MakeRequest(req, &configData); err != nil {
 		return err
 	}
-
 	var token string
-	err = json.Unmarshal(*configData["AccessToken"], &token)
-	if err != nil {
+	if err = json.Unmarshal(*configData["AccessToken"], &token); err != nil {
 		return err
 	}
-
 	context.AccessToken = token
-
 	var expireDate string
-	err = json.Unmarshal(*configData["Expire"], &expireDate)
-	if err != nil {
+	if err = json.Unmarshal(*configData["Expire"], &expireDate); err != nil {
 		return err
 	}
-
 	context.Expire = expireDate
-
 	return nil
 }
 
 // Balance is a GET method that returns Balance structure
 func Balance(context *utils.AppContext) (balance *BalanceResponse, err error) {
 	requestURL := context.APIURL + "account/balance"
-
-	req, err := utils.PrepareRequest("GET", requestURL, nil, context.AccessToken)
-
-	if err != nil {
+	var req *http.Request
+	if req, err = utils.PrepareRequest("GET", requestURL, nil, context.AccessToken); err != nil {
 		return nil, err
 	}
-
 	var b BalanceResponse
-	err = utils.MakeRequest(req, &b)
-
-	if err != nil {
+	if err = utils.MakeRequest(req, &b); err != nil {
 		return nil, err
 	}
-
 	return &b, nil
 }

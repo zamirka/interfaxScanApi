@@ -10,20 +10,19 @@ import (
 var ctx utils.AppContext
 
 func main() {
-	err := utils.InitExecutionContext(&ctx)
-	if err != nil {
+	var err error
+	if err = utils.InitExecutionContext(&ctx); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	err = methods.Login(&ctx)
-	if err != nil {
+	if err = methods.Login(&ctx); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	myq, err := methods.GetAllQueries(ctx)
-	if err != nil {
+	var myq []methods.SearchQuery
+	if myq, err = methods.GetAllQueries(ctx); err != nil {
 		fmt.Println(err)
 		return
 	}

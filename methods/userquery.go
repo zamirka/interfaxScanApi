@@ -3,6 +3,7 @@ package methods
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
 	"strconv"
 
 	"github.com/zamirka/interfaxScanApi/utils"
@@ -88,46 +89,34 @@ type SearchQuery struct {
 // GetQueryByID retrieves user query by ID
 func GetQueryByID(queryID int, context utils.AppContext) (query *SearchQuery, err error) {
 	requestURL := context.APIURL + "userQuery/" + strconv.Itoa(queryID)
-
-	req, err := utils.PrepareRequest("GET", requestURL, nil, context.AccessToken)
-
-	if err != nil {
+	var req *http.Request
+	if req, err = utils.PrepareRequest("GET", requestURL, nil, context.AccessToken); err != nil {
 		return nil, err
 	}
-
 	var qs SearchQuery
-	err = utils.MakeRequest(req, &qs)
-
-	if err != nil {
+	if err = utils.MakeRequest(req, &qs); err != nil {
 		return nil, err
 	}
-
 	return &qs, nil
 }
 
 // CreateOrUpdateQuery creates query if ID is 0 otherwise updates query with provided ID
 func CreateOrUpdateQuery(query SearchQuery, context utils.AppContext) (queryID int, err error) {
 	requestURL := context.APIURL + "userQuery"
-	dataToSend, err := json.Marshal(query)
-	if err != nil {
+	var dataToSend []byte
+	if dataToSend, err = json.Marshal(query); err != nil {
 		return 0, err
 	}
-	req, err := utils.PrepareRequest("POST", requestURL, bytes.NewReader(dataToSend), context.AccessToken)
-
-	if err != nil {
+	var req *http.Request
+	if req, err = utils.PrepareRequest("POST", requestURL, bytes.NewReader(dataToSend), context.AccessToken); err != nil {
 		return 0, err
 	}
-
 	var objmap map[string]*json.RawMessage
-	err = utils.MakeRequest(req, &objmap)
-
-	if err != nil {
+	if err = utils.MakeRequest(req, &objmap); err != nil {
 		return 0, err
 	}
-
 	var qid int
-	err = json.Unmarshal(*objmap["id"], &qid)
-	if err != nil {
+	if err = json.Unmarshal(*objmap["id"], &qid); err != nil {
 		return 0, err
 	}
 	return qid, nil
@@ -136,14 +125,13 @@ func CreateOrUpdateQuery(query SearchQuery, context utils.AppContext) (queryID i
 // GetAllQueries retrieves array of all queries of current user
 func GetAllQueries(context utils.AppContext) (queries []SearchQuery, err error) {
 	requestURL := context.APIURL + "userQuery"
-	req, err := utils.PrepareRequest("GET", requestURL, nil, context.AccessToken)
-
-	var myQueries []SearchQuery
-	err = utils.MakeRequest(req, &myQueries)
-
-	if err != nil {
+	var req *http.Request
+	if req, err = utils.PrepareRequest("GET", requestURL, nil, context.AccessToken); err != nil {
 		return nil, err
 	}
-
+	var myQueries []SearchQuery
+	if err = utils.MakeRequest(req, &myQueries); err != nil {
+		return nil, err
+	}
 	return myQueries, nil
 }
